@@ -5,8 +5,8 @@ pipeline {
         stage ('Trigger_Build_Job') {
             steps {
             script{
-           // def dateVar = sh returnStdout: true, script: 'date'
-           // echo "${dateVar}"
+           def dateVar = sh returnStdout: true, script: 'date'
+           echo "${dateVar}"
             build job: 'TestFreeStyle', parameters: [[$class: 'StringParameterValue', name : 'parameterOne' , value: params.module ]]
             
             }
@@ -42,8 +42,8 @@ pipeline {
             steps{
             script{
                 //sh returnStdout: true, script: 'docker-compose -f /lgames/docker-compose-all.yml -p testcomp up -d reference'
-                sh(script: 'pwd', returnStdout: true)
-                echo "Docker up and down working"   
+                def pathadd = sh(script: 'pwd', returnStdout: true)
+                echo "this is 110th build ${pathadd}"   
             }
             }
         }  
