@@ -1,6 +1,6 @@
 pipeline {
     agent any
-   // options { skipDefaultCheckout() }
+   options { skipDefaultCheckout() }
     stages {
         stage ('Trigger_Build_Job') {
             steps {
@@ -41,9 +41,9 @@ pipeline {
         stage ('Docker_testing'){
             steps{
             script{
-                //def dateVar1 = sh returnStdout: true, script: 'docker-compose -f /lgames/docker-compose-all.yml -p testcomp up -d reference'
-                //def ret = sh(script: 'docker-compose -f /lgames/docker-compose-all.yml -p testcomp down', returnStdout: true)
-                echo "Docker up and down over"   
+                sh returnStdout: true, script: 'docker-compose -f /lgames/docker-compose-all.yml -p testcomp up -d reference'
+                sh(script: 'docker-compose -f /lgames/docker-compose-all.yml -p testcomp down', returnStdout: true)
+                echo "Docker up and down working"   
             }
             }
         }
