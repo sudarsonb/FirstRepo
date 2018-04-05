@@ -42,7 +42,7 @@ pipeline {
             steps{
             script{
                 //sh returnStdout: true, script: 'docker-compose -f /lgames/docker-compose-all.yml -p testcomp up -d reference'
-                sh(script: 'pwd && ls -ltr', returnStdout: true)
+                sh(script: 'pwd', returnStdout: true)
                 echo "Docker up and down working"   
             }
             }
