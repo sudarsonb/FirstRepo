@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+    options { skipDefaultCheckout() }
     stages {
         stage ('Trigger_Build_Job') {
             steps {
