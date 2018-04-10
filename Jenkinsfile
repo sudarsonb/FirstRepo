@@ -43,7 +43,7 @@ pipeline {
             script{
                 //sh returnStdout: true, script: 'docker-compose -f /lgames/docker-compose-all.yml -p testcomp up -d reference'
                 def pathadd = sh(script: 'pwd', returnStdout: true)
-                echo "this is 110th build ${pathadd}"   
+                echo "this is 111th build ${pathadd}"   
             }
             }
         }  
@@ -51,6 +51,7 @@ pipeline {
             steps{
             script{
                 //sh returnStdout: true, script: 'docker-compose -f /lgames/docker-compose-all.yml -p testcomp up -d reference'
+                ///soap/SoapUI-5.4.0/bin/testrunner.sh /data01/jenkins/jobs/banking-enrolment-service-PR/workspace/nectar-openapi-enrolment-soapui-test/New-card-request-resource/NewCardRequest-soapui-project.xml -P Env=T6
                 //sh(script: 'docker-compose -f /lgames/docker-compose-all.yml -p testcomp down', returnStdout: true)
                 echo "Docker up and down working"   
             }
