@@ -15,5 +15,7 @@ sdfasdfsdsd
 98 builds over
 99th build
 107th Build
-checking 156 build by pull request polling
+checking 156 build by pull request polling - failed. prob with {sha1}, added (+refs/pull/*:refs/remotes/origin/pr/*)
+checking 158
+
 
