@@ -26,3 +26,4 @@ checking the test freestyle job - builded even before the commit
 test again
 pull builder is not working with pipeline
 hopeless
+again hopeless
