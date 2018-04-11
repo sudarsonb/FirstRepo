@@ -22,4 +22,5 @@ changed the branch name to "origin/pr/${pullRequestId}/from" to see if it works.
 changed the refspec to +refs/pull-requests/*/from:refs/remotes/origin/pr/*/from
 checked teh webhooks option.
 checking the branches build
-checking the test freestyle job
+checking the test freestyle job - builded even before the commit
+test again
