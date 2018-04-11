@@ -24,9 +24,6 @@ pipeline {
         stage ('Trigger_jmeter_Job'){
             steps{
             echo params.PerfTestOnT0
-            script{
-               sh 'exit 0'
-            }
             }
             post{
                 success{
