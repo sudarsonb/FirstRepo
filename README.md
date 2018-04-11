@@ -18,5 +18,5 @@ sdfasdfsdsd
 checking 156 build by pull request polling - failed. prob with {sha1}, added (+refs/pull/*:refs/remotes/origin/pr/*)
 checking 158
 checking PR build
-
+changed the branch name to "origin/pr/${pullRequestId}/from" to see if it works.
 
