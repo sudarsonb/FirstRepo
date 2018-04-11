@@ -19,4 +19,4 @@ checking 156 build by pull request polling - failed. prob with {sha1}, added (+r
 checking 158
 checking PR build
 changed the branch name to "origin/pr/${pullRequestId}/from" to see if it works.
-
+changed the refspec to +refs/pull-requests/*/from:refs/remotes/origin/pr/*/from
