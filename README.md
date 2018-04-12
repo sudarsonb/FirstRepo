@@ -27,3 +27,7 @@ test again
 pull builder is not working with pipeline
 hopeless
 again hopeless
+checking previous pull request - success
+checking if it will trigger the pipelineJob which is created from the FreeStyleJob -failed
+changing Refspec to '+refs/pull/*:refs/remotes/origin/pr/*' and checking - failed
+added name as origin...
