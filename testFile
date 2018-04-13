@@ -6,3 +6,4 @@ testing again
 test test test sha1 prob trying with pull request ID | no use | ${sha1} | extracting the commit ID 
 printing commit id before checkout - worked
 Proving the commit id in the branches field.
+failed
