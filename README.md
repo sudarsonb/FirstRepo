@@ -33,3 +33,4 @@ checking if it will trigger the pipelineJob which is created from the FreeStyleJ
 changing Refspec to '+refs/pull/*:refs/remotes/origin/pr/*' and checking - failed
 added name as origin...
 starting the git testing
+May 21 - testing pull request builder
