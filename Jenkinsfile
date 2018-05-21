@@ -1,5 +1,6 @@
 pipeline {
     agent any
+    //
    //options { skipDefaultCheckout() }
     stages {
         stage ('Trigger_Build_Job') {
@@ -7,7 +8,7 @@ pipeline {
             script{
            def dateVar = sh returnStdout: true, script: 'date'
            echo "${dateVar}"
-            build job: 'TestFreeStyle', parameters: [[$class: 'StringParameterValue', name : 'parameterOne' , value: params.module ]]
+            //build job: 'TestFreeStyle', parameters: [[$class: 'StringParameterValue', name : 'parameterOne' , value: params.module ]]
             
             }
             }
