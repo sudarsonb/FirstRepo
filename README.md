@@ -34,3 +34,4 @@ changing Refspec to '+refs/pull/*:refs/remotes/origin/pr/*' and checking - faile
 added name as origin...
 starting the git testing
 May 21 - testing pull request builder
+=================================================
