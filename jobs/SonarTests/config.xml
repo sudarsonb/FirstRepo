@@ -1,0 +1,107 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.cloudbees.plugins.deployer.DeployNowJobProperty plugin="deployer-framework@1.1">
+      <oneClickDeploy>false</oneClickDeploy>
+      <hosts/>
+    </com.cloudbees.plugins.deployer.DeployNowJobProperty>
+    <com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty plugin="naginator@1.17.2">
+      <optOut>false</optOut>
+    </com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty>
+    <org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration plugin="periodic-reincarnation@1.12.1">
+      <isLocallyConfigured>false</isLocallyConfigured>
+      <isLocallyDeactivated>false</isLocallyDeactivated>
+    </org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>branch</name>
+          <description></description>
+          <defaultValue>*</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>module</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>UpStreamJob</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#banking-auth-service
+#banking-reference-service
+#banking-enrolment-service
+#banking-transaction-service
+#banking-personal-service
+
+echo &apos;dummy check..&apos;</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <org.quality.gates.jenkins.plugin.QGPublisher plugin="sonar-quality-gates@1.3.0">
+      <jobConfigData>
+        <projectKey>org.sonarqube:${module}:$branch</projectKey>
+        <sonarInstanceName>GalSonar</sonarInstanceName>
+        <attemptsToRepeat>0</attemptsToRepeat>
+        <buildStatus>FAILED</buildStatus>
+      </jobConfigData>
+      <buildDecision>
+        <qualityGatesProvider>
+          <qualityGateResponseParser/>
+          <sonarHttpRequester class="org.quality.gates.sonar.api61.SonarHttpRequester61">
+            <logged>false</logged>
+          </sonarHttpRequester>
+          <sonarInstanceValidationService/>
+        </qualityGatesProvider>
+      </buildDecision>
+      <jobConfigurationService/>
+      <jobExecutionService/>
+    </org.quality.gates.jenkins.plugin.QGPublisher>
+    <jenkins.plugins.slack.SlackNotifier plugin="slack@2.3">
+      <baseUrl></baseUrl>
+      <teamDomain></teamDomain>
+      <authToken></authToken>
+      <authTokenCredentialId>SlackKey</authTokenCredentialId>
+      <botUser>false</botUser>
+      <room>nectar_ci_cd</room>
+      <startNotification>false</startNotification>
+      <notifySuccess>false</notifySuccess>
+      <notifyAborted>true</notifyAborted>
+      <notifyNotBuilt>false</notifyNotBuilt>
+      <notifyUnstable>false</notifyUnstable>
+      <notifyRegression>false</notifyRegression>
+      <notifyFailure>true</notifyFailure>
+      <notifyBackToNormal>false</notifyBackToNormal>
+      <notifyRepeatedFailure>false</notifyRepeatedFailure>
+      <includeTestSummary>false</includeTestSummary>
+      <includeFailedTests>false</includeFailedTests>
+      <commitInfoChoice>AUTHORS</commitInfoChoice>
+      <includeCustomMessage>true</includeCustomMessage>
+      <customMessage>${UpStreamJob}</customMessage>
+    </jenkins.plugins.slack.SlackNotifier>
+  </publishers>
+  <buildWrappers/>
+</project>

@@ -1,0 +1,230 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>3</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.1">
+      <projectUrl>https://github.com/nectar-uk/banking-batch/</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty plugin="naginator@1.17.2">
+      <optOut>false</optOut>
+    </com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty>
+    <org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration plugin="periodic-reincarnation@1.12.1">
+      <isLocallyConfigured>false</isLocallyConfigured>
+      <isLocallyDeactivated>false</isLocallyDeactivated>
+    </org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.1">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <refspec>+refs/pull/*:refs/remotes/origin/pr/*</refspec>
+        <url>https://github.com/nectar-uk/banking-batch.git</url>
+        <credentialsId>GitToken</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>B-1090</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <browser class="hudson.plugins.git.browser.GithubWeb">
+      <url>https://github.com/nectar-uk/banking-batch/</url>
+    </browser>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>true</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.42.0">
+      <spec>H/5 * * * *</spec>
+      <configVersion>3</configVersion>
+      <adminlist>budayabanu
+asivasankari
+bravikumar
+chrisheaththomas
+edwinbka
+IswaryaSrinivasan
+MadhubalaM
+MonicaChandrasekar
+ukylasanathan
+vveluswamy 
+hsekar 
+vsubramanian25
+guruselvam
+Selvakumar77
+sathyaks
+vivekkr
+dmuthusamy
+deepakkumarn
+hgali1</adminlist>
+      <allowMembersOfWhitelistedOrgsAsAdmin>false</allowMembersOfWhitelistedOrgsAsAdmin>
+      <orgslist></orgslist>
+      <cron>H/5 * * * *</cron>
+      <buildDescTemplate></buildDescTemplate>
+      <onlyTriggerPhrase>false</onlyTriggerPhrase>
+      <useGitHubHooks>false</useGitHubHooks>
+      <permitAll>false</permitAll>
+      <whitelist> kannanve</whitelist>
+      <autoCloseFailedPullRequests>false</autoCloseFailedPullRequests>
+      <displayBuildErrorsOnDownstreamBuilds>false</displayBuildErrorsOnDownstreamBuilds>
+      <whiteListTargetBranches>
+        <org.jenkinsci.plugins.ghprb.GhprbBranch>
+          <branch></branch>
+        </org.jenkinsci.plugins.ghprb.GhprbBranch>
+      </whiteListTargetBranches>
+      <blackListTargetBranches>
+        <org.jenkinsci.plugins.ghprb.GhprbBranch>
+          <branch></branch>
+        </org.jenkinsci.plugins.ghprb.GhprbBranch>
+      </blackListTargetBranches>
+      <gitHubAuthId>11faa610-ed50-42ab-bb14-da083b3611ed</gitHubAuthId>
+      <triggerPhrase></triggerPhrase>
+      <skipBuildPhrase>.*\[skip\W+ci\].*</skipBuildPhrase>
+      <blackListCommitAuthor></blackListCommitAuthor>
+      <blackListLabels></blackListLabels>
+      <whiteListLabels></whiteListLabels>
+      <includedRegions></includedRegions>
+      <excludedRegions></excludedRegions>
+      <extensions>
+        <org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus>
+          <commitStatusContext></commitStatusContext>
+          <triggeredStatus></triggeredStatus>
+          <startedStatus></startedStatus>
+          <statusUrl></statusUrl>
+          <addTestResults>false</addTestResults>
+        </org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus>
+      </extensions>
+    </org.jenkinsci.plugins.ghprb.GhprbTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/sh
+cd deploy/python
+git clone https://nectar-banking-jenkins:b358f867bb5b2f13de77f06d5677bd34de1e244a@github.com/nectar-uk/banking-database.git
+cd banking-database
+git checkout ${ghprbSourceBranch}
+cd ..
+var=&quot;org.sonarqube:banking-batch:&quot;
+echo BRANCH=$var$ghprbSourceBranch &gt; env.properties
+env
+docker-compose -f docker-compose-ci.yml -p ci stop
+docker-compose -f docker-compose-ci.yml -p ci rm --force
+echo &apos;start ndwh-db&apos;
+docker-compose -f docker-compose-ci.yml -p ci up -d ndwh-db
+echo &apos;deploy ndwh schema&apos;
+./banking-database/ndwh-docker/deploy-ndwh-schema-docker.sh -p ci
+echo &apos;start molehill-db&apos;
+docker-compose -f docker-compose-ci.yml -p ci up -d molehill-db
+echo &apos;deploy schema&apos;
+./banking-database/docker/deploy-molehill-schema-docker.sh -p ci
+echo &apos;run tests&apos;
+docker-compose -f docker-compose-ci.yml -p ci up -d eagleeye 
+docker-compose -f docker-compose-ci.yml -p ci build batch 
+docker-compose -f docker-compose-ci.yml -p ci up batch
+docker-compose -f docker-compose-ci.yml -p ci build prop-batch
+docker-compose -f docker-compose-ci.yml -p ci up prop-batch
+sed -i &apos;s|&apos;/python&apos;|&apos;/data01/jenkins/jobs/banking-batch-PR/workspace/deploy/python&apos;|g&apos; coverage.xml
+</command>
+    </hudson.tasks.Shell>
+    <hudson.plugins.sonar.SonarRunnerBuilder plugin="sonar@2.7.1">
+      <project></project>
+      <properties>sonar.projectBaseDir=/data01/jenkins/jobs/banking-batch-PR/workspace/deploy/python
+sonar.projectVersion=1.0
+# Comma-separated paths to directories with sources (required)
+sonar.sources=batches,PS_Scripts
+sonar.test=tests
+# Language
+sonar.language=py
+
+sonar.python.xunit.reportPath=nosetests.xml
+
+sonar.python.coverage.reportPath=coverage.xml
+
+# Encoding of the source files
+sonar.sourceEncoding=UTF-8
+</properties>
+      <javaOpts></javaOpts>
+      <additionalArguments>-Dsonar.projectKey=&quot;org.sonarqube:banking-batch&quot;
+-Dsonar.projectName=&quot;banking-batch&quot;
+-Dsonar.branch=&quot;${ghprbSourceBranch}&quot;
+</additionalArguments>
+      <jdk>(Inherit From Job)</jdk>
+      <task></task>
+    </hudson.plugins.sonar.SonarRunnerBuilder>
+    <EnvInjectBuilder plugin="envinject@2.1.5">
+      <info>
+        <propertiesFilePath>deploy/python/env.properties</propertiesFilePath>
+      </info>
+    </EnvInjectBuilder>
+  </builders>
+  <publishers>
+    <org.quality.gates.jenkins.plugin.QGPublisher plugin="sonar-quality-gates@1.3.0">
+      <jobConfigData>
+        <projectKey>org.sonarqube:banking-batch:${ghprbSourceBranch}</projectKey>
+        <sonarInstanceName>GalSonar</sonarInstanceName>
+        <attemptsToRepeat>0</attemptsToRepeat>
+        <buildStatus>FAILED</buildStatus>
+      </jobConfigData>
+      <buildDecision>
+        <qualityGatesProvider>
+          <qualityGateResponseParser/>
+          <sonarHttpRequester class="org.quality.gates.sonar.api61.SonarHttpRequester61">
+            <logged>false</logged>
+          </sonarHttpRequester>
+          <sonarInstanceValidationService/>
+        </qualityGatesProvider>
+      </buildDecision>
+      <jobConfigurationService/>
+      <jobExecutionService/>
+    </org.quality.gates.jenkins.plugin.QGPublisher>
+    <jenkins.plugins.slack.SlackNotifier plugin="slack@2.3">
+      <baseUrl></baseUrl>
+      <teamDomain></teamDomain>
+      <authToken></authToken>
+      <authTokenCredentialId></authTokenCredentialId>
+      <botUser>false</botUser>
+      <room></room>
+      <startNotification>true</startNotification>
+      <notifySuccess>true</notifySuccess>
+      <notifyAborted>false</notifyAborted>
+      <notifyNotBuilt>false</notifyNotBuilt>
+      <notifyUnstable>true</notifyUnstable>
+      <notifyRegression>false</notifyRegression>
+      <notifyFailure>true</notifyFailure>
+      <notifyBackToNormal>false</notifyBackToNormal>
+      <notifyRepeatedFailure>false</notifyRepeatedFailure>
+      <includeTestSummary>false</includeTestSummary>
+      <includeFailedTests>false</includeFailedTests>
+      <commitInfoChoice>NONE</commitInfoChoice>
+      <includeCustomMessage>false</includeCustomMessage>
+      <customMessage></customMessage>
+    </jenkins.plugins.slack.SlackNotifier>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.34">
+      <deleteDirs>true</deleteDirs>
+      <cleanupParameter></cleanupParameter>
+      <externalDelete>sudo rm -rf %s</externalDelete>
+    </hudson.plugins.ws__cleanup.PreBuildCleanup>
+  </buildWrappers>
+</project>

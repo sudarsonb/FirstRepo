@@ -1,0 +1,125 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.21">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.2.9"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.2.9">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>3</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration plugin="periodic-reincarnation@1.12.1">
+      <isLocallyConfigured>false</isLocallyConfigured>
+      <isLocallyDeactivated>false</isLocallyDeactivated>
+    </org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.53">
+    <script>pipeline {
+    agent any
+    stages {
+        stage (&apos;TESTS_DOCKER_ENV&apos;){
+            steps{
+            script{
+                //sh returnStdout: true, script: &apos;docker-compose -f /lgames/docker-compose-all.yml -p testcomp up -d&apos;
+                
+                //sh &apos;/soap/SoapUI-5.4.0/bin/testrunner.sh /data01/jenkins/jobs/TestFreeStyle2/workspace/nectar-openapi-enrolment-soapui-test/New-card-request-resource/NewCardRequest-soapui-project.xml -P Env=Docker || true&apos;
+                
+                //sh(script: &apos;docker-compose -f /lgames/docker-compose-all.yml -p testcomp down&apos;, returnStdout: true)
+                echo &quot;Docker up and down working&quot;   
+            }
+            }
+            post{
+                success{
+                    echo &quot;SOAP Step execution Success&quot;
+                }
+                failure{
+                    build job:&apos;Send_Email&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;message&apos; , value: &quot;Enrolment SOAP step failed&quot; ]]
+                    
+                }
+            }
+        }
+        stage (&apos;RC_PREPARATION&apos;){
+            steps{
+            script{
+                sh &apos;rm -rf rc_preparation&apos;
+                sh returnStdout: true, script: &apos;mkdir -p rc_preparation&apos;
+                sh &apos;git clone https://nectar-banking-jenkins:b358f867bb5b2f13de77f06d5677bd34de1e244a@github.com/nectar-uk/banking-enrolment-service.git rc_preparation/&apos;
+                sh &apos;&apos;&apos;
+                cd rc_preparation
+                mvn --batch-mode jgitflow:release-start -s maven-docker-settings.xml
+                &apos;&apos;&apos;
+            }
+            }
+                        post{
+                success{
+                    echo &quot;SOAP Step execution Success&quot;
+                }
+                failure{
+                    build job:&apos;Send_Email&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;message&apos; , value: &quot;Enrolment RC preparation failed&quot; ]]
+                    
+                }
+            }
+        }
+        stage (&apos;Integration/Functional_Test_T5&apos;){
+            steps{
+                script{
+                    //sh &apos;&apos;&apos; 
+                    //cp -u /data01/jenkins/jobs/banking-enrolment-service-PR/workspace/nectar-openapi-enrolment-rest/target/nectar-openapi-enrolment.war /data01/ansible_banking &amp;&amp;
+                    //cp -u /data01/jenkins/jobs/banking-reference-service-PR/workspace/nectar-openapi-reference-rest/target/nectar-openapi-reference.war /data01/ansible_banking &amp;&amp;
+                    //cp -u /data01/jenkins/jobs/banking-transaction-service-PR/workspace/nectar-openapi-transaction-rest/target/nectar-openapi-transaction.war /data01/ansible_banking &amp;&amp;
+                    //cp -u /data01/jenkins/jobs/banking-personal-service-PR/workspace/nectar-openapi-personal-rest/target/nectar-openapi-personal.war /data01/ansible_banking
+                     //&apos;&apos;&apos;
+                    
+                     sh &apos;echo &quot;add ansible command here to push and run test on T5&quot;&apos;
+                     //build job:&apos;Artifact Deployment&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;Environment&apos; , value: &apos;T4&apos; ]]
+                     //sh &apos;/soap/SoapUI-5.4.0/bin/testrunner.sh /data01/jenkins/jobs/TestFreeStyle2/workspace/nectar-openapi-enrolment-soapui-test/New-card-request-resource/NewCardRequest-soapui-project.xml -P Env=T4 || true&apos;
+                    }
+            }
+            post{
+                success{
+                    echo &quot;Step execution Success&quot;
+                }
+                failure{
+                    build job:&apos;Send_Email&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;message&apos; , value: &quot;Enrolment Integration Test failed&quot; ]]
+                    
+                }
+            }
+        }
+        stage (&apos;Service-now_Ticket_Creation&apos;){
+            steps{
+                script{
+                     build job:&apos;Email-Service-Now&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;--------&apos; , value: &apos;--&apos; ]]
+                     //sh &apos;/soap/SoapUI-5.4.0/bin/testrunner.sh /data01/jenkins/jobs/TestFreeStyle2/workspace/nectar-openapi-enrolment-soapui-test/New-card-request-resource/NewCardRequest-soapui-project.xml -P Env=T4 || true&apos;
+                    }
+            }
+            post{
+                success{
+                    echo &quot;Step execution Success&quot;
+                }
+                failure{
+                    build job:&apos;Send_Email&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;message&apos; , value: &quot;Enrollment: Error in Ticket creation&quot; ]]
+                    
+                }
+            }
+        }
+        }
+    }</script>
+    <sandbox>false</sandbox>
+  </definition>
+  <disabled>false</disabled>
+</flow-definition>

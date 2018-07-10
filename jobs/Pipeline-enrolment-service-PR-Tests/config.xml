@@ -1,0 +1,158 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.21">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.2.9"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.2.9">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>3</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration plugin="periodic-reincarnation@1.12.1">
+      <isLocallyConfigured>false</isLocallyConfigured>
+      <isLocallyDeactivated>false</isLocallyDeactivated>
+    </org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>FunctionalTestSrv</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>T4</string>
+              <string>T6</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>PerfTestOnT0</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>Needed</string>
+              <string>Notneeded</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.53">
+    <script>pipeline {
+    agent any
+    stages {
+        stage (&apos;Jmeter Job&apos;){
+            steps{
+                script{
+                     //build job:&apos;jmeter-job&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;module&apos; , value: &quot;banking-enrolment-service-PR&quot; ]]
+                    sh &apos;echo &quot;jmeter ran&quot;&apos;
+                    
+                }
+            }
+            post{
+                success{
+                    echo &quot;Jmeter job execution Success&quot;
+                }
+                failure{
+                    build job:&apos;Send_mail&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;message&apos; , value: &quot;jMeter failed&quot; ]]
+                    
+                }
+            }
+        }
+        stage (&apos;SOAP_TEST&apos;){
+            steps{
+            script{
+                //sh returnStdout: true, script: &apos;docker-compose -f /lgames/docker-compose-all.yml -p testcomp up -d&apos;
+                
+                //sh &apos;/data01/soap/SoapUI-5.4.0/bin/testrunner.sh /data01/jenkins/jobs/TestFreeStyle2/workspace/nectar-openapi-enrolment-soapui-test/New-card-request-resource/NewCardRequest-soapui-project.xml -P Env=Docker || true&apos;
+                
+                //sh(script: &apos;docker-compose -f /lgames/docker-compose-all.yml -p testcomp down&apos;, returnStdout: true)
+                echo &quot;Docker up and down working&quot;   
+            }
+            }
+            post{
+                success{
+                    echo &quot;SOAP Step execution Success&quot;
+                }
+                failure{
+                    build job:&apos;Send_Email&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;message&apos; , value: &quot;SOAP step failed&quot; ]]
+                    
+                }
+            }
+        }
+        stage (&apos;Functional_Test_T4/T6&apos;){
+            steps{
+                script{
+                    //sh &apos;&apos;&apos; 
+                    //cp -u /data01/jenkins/jobs/banking-enrolment-service-PR/workspace/nectar-openapi-enrolment-rest/target/nectar-openapi-enrolment.war /data01/ansible_banking &amp;&amp;
+                    //cp -u /data01/jenkins/jobs/banking-reference-service-PR/workspace/nectar-openapi-reference-rest/target/nectar-openapi-reference.war /data01/ansible_banking &amp;&amp;
+                    //cp -u /data01/jenkins/jobs/banking-transaction-service-PR/workspace/nectar-openapi-transaction-rest/target/nectar-openapi-transaction.war /data01/ansible_banking &amp;&amp;
+                    //cp -u /data01/jenkins/jobs/banking-personal-service-PR/workspace/nectar-openapi-personal-rest/target/nectar-openapi-personal.war /data01/ansible_banking
+                     //&apos;&apos;&apos;
+                    if  ( params.FunctionalTestSrv == &apos;T4&apos; )
+                    {
+                     sh &apos;echo &quot;add ansible command here to push and run test on T4&quot;&apos;
+                     //build job:&apos;Artifact Deployment&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;Environment&apos; , value: &apos;T4&apos; ]]
+                     //sh &apos;/data01/soap/SoapUI-5.4.0/bin/testrunner.sh /data01/jenkins/jobs/TestFreeStyle2/workspace/nectar-openapi-enrolment-soapui-test/New-card-request-resource/NewCardRequest-soapui-project.xml -P Env=T4 || true&apos;
+                    }
+                    else {
+                     sh &apos;echo &quot;add ansible command here to push and run test on T6&quot;&apos;   
+                     //build job:&apos;Artifact Deployment&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;Environment&apos; , value: &apos;T6&apos; ]]
+                     //sh &apos;ansible-playbook -i hosts-T6 tomcat-deployer.yml -verbose&apos;
+                     //sh &apos;/data01/soap/SoapUI-5.4.0/bin/testrunner.sh /data01/jenkins/jobs/TestFreeStyle2/workspace/nectar-openapi-enrolment-soapui-test/New-card-request-resource/NewCardRequest-soapui-project.xml -P Env=T6 || true&apos;
+                    }
+                    }
+            }
+            post{
+                success{
+                    echo &quot;SOAP Step execution Success&quot;
+                }
+                failure{
+                    build job:&apos;Send_Email&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;message&apos; , value: &quot;Functional Test step failed&quot; ]]
+                    
+                }
+            }
+        }
+        stage (&apos;Performance_Test_T0&apos;){
+            steps{
+                script{
+                    if  ( params.PerfTestOnT0 == &apos;Needed&apos; )
+                    {
+                     //build job:&apos;Artifact Deployment&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;Environment&apos; , value: &quot;banking-enrolment-service-PR&quot; ]]
+                    }
+                    else {
+                     sh &apos;echo &quot;Performace test is omitted&quot;&apos;            
+                    }
+                    }
+            }
+            post{
+                success{
+                    echo &quot;Step execution Success&quot;
+                }
+                failure{
+                    build job:&apos;Send_Email&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;message&apos; , value: &quot;jMeter/Performance Test failed&quot; ]]
+                    
+                }
+            }
+        }
+        }
+    }</script>
+    <sandbox>false</sandbox>
+  </definition>
+  <disabled>true</disabled>
+</flow-definition>

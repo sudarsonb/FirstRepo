@@ -1,0 +1,75 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.21">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.2.9"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.2.9">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration plugin="periodic-reincarnation@1.12.1">
+      <isLocallyConfigured>false</isLocallyConfigured>
+      <isLocallyDeactivated>false</isLocallyDeactivated>
+    </org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.53">
+    <script>@NonCPS
+def getBuildUser() {
+    return currentBuild.rawBuild.getCause(Cause.UserIdCause).getUserId()
+}
+
+
+node{
+wrap([$class: &apos;BuildUser&apos;]) { 
+        wrap([$class: &apos;TimestamperBuildWrapper&apos;]) { 
+            sh &apos;echo ${BUILD_USER}&apos; // both wrappers applied here
+            sh &apos;echo ${BUILD_USER_ID}&apos;
+            build job: &apos;test1&apos;, parameters: [string(name: &apos;vrb&apos;, value: getBuildUser())]
+        }
+    }
+stage(&apos;SCM&apos;){
+    sh &apos;pwd&apos;
+    sh &apos;ls -ltr&apos;
+    git branch: &apos;sudarsonb-patch-7&apos;, changelog: false, credentialsId: &apos;ID&apos;, poll: false, url: &apos;https://github.com/sudarsonb/FirstRepo.git&apos;
+    sh &apos;ls -ltr&apos;
+    string str = sh  returnStdout: true, script: &apos;git log -1|grep Author&apos;
+    sh &apos;cd .. &amp;&amp; rm -rf workspace/*&apos;
+    sh &apos;ls -ltr&apos;
+    println str
+}
+    
+}
+pipeline {
+  agent any
+
+  stages {
+    stage(&apos;build user&apos;) {
+      steps {
+        wrap([$class: &apos;BuildUser&apos;]) {
+          sh &apos;pwd&apos;
+          echo getBuildUser()
+        }
+        println str
+        build job: &apos;test1&apos;, parameters: [string(name: &apos;vrb&apos;, value: str)]
+      }
+    }
+    stage(&apos;ID&apos;){
+        steps {
+            sh &apos;echo &quot;${BUILD_USER}&quot;&apos;
+        }
+    }
+  }
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

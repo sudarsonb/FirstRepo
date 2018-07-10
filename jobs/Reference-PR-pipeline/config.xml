@@ -1,0 +1,130 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.21">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty/>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.1">
+      <projectUrl>https://github.com/nectar-uk/banking-reference-service/</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration plugin="periodic-reincarnation@1.12.1">
+      <isLocallyConfigured>false</isLocallyConfigured>
+      <isLocallyDeactivated>false</isLocallyDeactivated>
+    </org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.PasswordParameterDefinition>
+          <name>token</name>
+          <description></description>
+          <defaultValue>{AQAAABAAAAAwpz05q8k/+9T3HHM52PpwqRFFxF/bvnEeYKkVRReVOr1AuWGzZ4/kJz1CzIm3iBqi7XsW2T949DZruo3ugL+RWA==}</defaultValue>
+        </hudson.model.PasswordParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers>
+        <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.42.0">
+          <spec>H/5 * * * *</spec>
+          <configVersion>3</configVersion>
+          <adminlist>budayabanu
+asivasankari
+bravikumar
+edwinbka
+MadhubalaM
+MonicaChandrasekar
+vveluswamy
+hsekar
+sathyaks
+deepakkumarn
+hgali1
+sudarsonb</adminlist>
+          <allowMembersOfWhitelistedOrgsAsAdmin>false</allowMembersOfWhitelistedOrgsAsAdmin>
+          <orgslist></orgslist>
+          <cron>H/5 * * * *</cron>
+          <buildDescTemplate></buildDescTemplate>
+          <onlyTriggerPhrase>false</onlyTriggerPhrase>
+          <useGitHubHooks>false</useGitHubHooks>
+          <permitAll>false</permitAll>
+          <whitelist></whitelist>
+          <autoCloseFailedPullRequests>false</autoCloseFailedPullRequests>
+          <displayBuildErrorsOnDownstreamBuilds>false</displayBuildErrorsOnDownstreamBuilds>
+          <whiteListTargetBranches>
+            <org.jenkinsci.plugins.ghprb.GhprbBranch>
+              <branch></branch>
+            </org.jenkinsci.plugins.ghprb.GhprbBranch>
+          </whiteListTargetBranches>
+          <blackListTargetBranches>
+            <org.jenkinsci.plugins.ghprb.GhprbBranch>
+              <branch></branch>
+            </org.jenkinsci.plugins.ghprb.GhprbBranch>
+          </blackListTargetBranches>
+          <gitHubAuthId>b758ea57-6373-4774-9899-adad46881c62</gitHubAuthId>
+          <triggerPhrase></triggerPhrase>
+          <skipBuildPhrase>.*\[skip\W+ci\].*</skipBuildPhrase>
+          <blackListCommitAuthor></blackListCommitAuthor>
+          <blackListLabels></blackListLabels>
+          <whiteListLabels></whiteListLabels>
+          <includedRegions></includedRegions>
+          <excludedRegions></excludedRegions>
+          <extensions>
+            <org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus>
+              <commitStatusContext></commitStatusContext>
+              <triggeredStatus></triggeredStatus>
+              <startedStatus></startedStatus>
+              <statusUrl></statusUrl>
+              <addTestResults>false</addTestResults>
+            </org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus>
+          </extensions>
+        </org.jenkinsci.plugins.ghprb.GhprbTrigger>
+      </triggers>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.53">
+    <script>node {
+   stage(&apos;Preparation&apos;) {
+       int check_branch = sh  returnStdout: true, script: &apos;/data01/jenkins/tools/branch_check.sh&apos;
+       echo env.ghprbSourceBranch
+       if  (check_branch==1)
+      {
+        
+        echo &quot;***Branch exists : Triggering Common build***&quot;
+        build job: &apos;common-build&apos;, parameters: [string(name: &apos;branch&apos;, value: env.ghprbSourceBranch)]
+      }
+      else
+      { 
+          
+          println &quot;***Branch doesnt exist in common module***&quot;
+      }
+   }
+   stage(&apos;Build&apos;) {
+       echo env.ghprbSourceBranch
+       build job: &apos;banking-reference-service-PR&apos;, parameters: [string(name: &apos;branch&apos;, value: env.ghprbSourceBranch)]
+       echo &quot;Reference-build success&quot;
+   }
+   stage(&apos;SonarGate&apos;) {
+       
+       build job: &apos;SonarTests&apos;, parameters: [string(name: &apos;branch&apos;, value: env.ghprbSourceBranch), string(name: &apos;module&apos;, value: &apos;banking-reference-service&apos;)], propagate: false
+       echo &apos;SonarGate = Success&apos;
+   }
+      stage(&apos;jmeter&apos;) {
+       build job: &apos;jmeter-job&apos;, parameters: [ string(name: &apos;module&apos;, value: &apos;banking-reference-service-PR&apos;)], propagate: false
+   }
+}
+</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <disabled>false</disabled>
+</flow-definition>

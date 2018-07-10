@@ -1,0 +1,47 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty plugin="naginator@1.17.2">
+      <optOut>false</optOut>
+    </com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty>
+    <org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration plugin="periodic-reincarnation@1.12.1">
+      <isLocallyConfigured>false</isLocallyConfigured>
+      <isLocallyDeactivated>false</isLocallyDeactivated>
+    </org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <assignedNode>Perf_Windows</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.webload.WebLoadConsoleBuilder plugin="webload@1.9">
+      <tplFile>C:\Performance_Testing\Projects\STD_LOADTEMPLATES\Banking_DirectAPI_Test.tpl</tplFile>
+      <lsFile>C:\Performance_Testing_RESULTS\Banking_Jenkins\Banking_DirectAPI_Test_Result_${BUILD_NUMBER}.ls</lsFile>
+      <executionDuration>0</executionDuration>
+      <virtualClients>0</virtualClients>
+      <probindClient>0</probindClient>
+    </hudson.plugins.webload.WebLoadConsoleBuilder>
+    <hudson.plugins.webload.WebLoadAnalyticsBuilder plugin="webload@1.9">
+      <inputLsFile>C:\Performance_Testing_RESULTS\Banking_Jenkins\Banking_DirectAPI_Test_Result_${BUILD_NUMBER}.ls</inputLsFile>
+      <portfolioFile>Banking Jenkin</portfolioFile>
+      <format>PDF</format>
+      <location></location>
+      <reportName>Banking_DirectAPI_Test_Result_${BUILD_NUMBER}</reportName>
+      <compareToSessions>C:\Performance_Testing_RESULTS\Banking_Jenkins\DirectAPI_Baseline.ls</compareToSessions>
+      <compareToPreviousBuilds>0</compareToPreviousBuilds>
+    </hudson.plugins.webload.WebLoadAnalyticsBuilder>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

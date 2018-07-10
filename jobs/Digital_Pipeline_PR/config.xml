@@ -1,0 +1,125 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.21">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.3"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.3">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers>
+        <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.42.0">
+          <spec>H/5 * * * *</spec>
+          <configVersion>3</configVersion>
+          <adminlist>sudarsonb
+VasanthInfosys
+ramsankar-k
+SudhaN85
+johnHawthorne
+amehra-infy</adminlist>
+          <allowMembersOfWhitelistedOrgsAsAdmin>false</allowMembersOfWhitelistedOrgsAsAdmin>
+          <orgslist></orgslist>
+          <cron>H/5 * * * *</cron>
+          <buildDescTemplate></buildDescTemplate>
+          <onlyTriggerPhrase>false</onlyTriggerPhrase>
+          <useGitHubHooks>false</useGitHubHooks>
+          <permitAll>false</permitAll>
+          <whitelist></whitelist>
+          <autoCloseFailedPullRequests>false</autoCloseFailedPullRequests>
+          <displayBuildErrorsOnDownstreamBuilds>false</displayBuildErrorsOnDownstreamBuilds>
+          <whiteListTargetBranches>
+            <org.jenkinsci.plugins.ghprb.GhprbBranch>
+              <branch></branch>
+            </org.jenkinsci.plugins.ghprb.GhprbBranch>
+          </whiteListTargetBranches>
+          <blackListTargetBranches>
+            <org.jenkinsci.plugins.ghprb.GhprbBranch>
+              <branch></branch>
+            </org.jenkinsci.plugins.ghprb.GhprbBranch>
+          </blackListTargetBranches>
+          <gitHubAuthId>05357256-2404-4efd-8544-3d67faf05f61</gitHubAuthId>
+          <triggerPhrase></triggerPhrase>
+          <skipBuildPhrase>.*\[skip\W+ci\].*</skipBuildPhrase>
+          <blackListCommitAuthor></blackListCommitAuthor>
+          <blackListLabels></blackListLabels>
+          <whiteListLabels></whiteListLabels>
+          <includedRegions></includedRegions>
+          <excludedRegions></excludedRegions>
+          <extensions>
+            <org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus>
+              <commitStatusContext></commitStatusContext>
+              <triggeredStatus></triggeredStatus>
+              <startedStatus></startedStatus>
+              <statusUrl></statusUrl>
+              <addTestResults>false</addTestResults>
+            </org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus>
+          </extensions>
+        </org.jenkinsci.plugins.ghprb.GhprbTrigger>
+      </triggers>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.2">
+      <projectUrl>https://github.com/nectar-uk/nectar-website/</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration plugin="periodic-reincarnation@1.12.1">
+      <isLocallyConfigured>false</isLocallyConfigured>
+      <isLocallyDeactivated>false</isLocallyDeactivated>
+    </org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+    <script>pipeline {
+    //agent { label &apos;bamboo&apos; }
+    agent any
+    stages {
+        stage (&apos;Build&apos;){
+            steps{
+                script{
+                        sh &apos;pwd&apos;
+                        git branch: env.ghprbSourceBranch, changelog: false, credentialsId: &apos;Digital-GIT&apos;, poll: false, url: &apos;https://github.com/nectar-uk/nectar-website.git&apos;
+                        sh &apos;ls -ltr&apos;
+                        string str = sh  returnStdout: true, script: &apos;git log -1|grep Author&apos;
+                        sh &apos;cd .. &amp;&amp; rm -rf workspace/*&apos;
+                        println &quot;Commited by: &quot; + str
+                     // build job:&apos;Digital_Build&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;branch&apos; , value: &quot;web1282&quot; ]]
+                        build job:&apos;Digital_Build&apos;,parameters: [string( name : &apos;branch&apos; , value: env.ghprbSourceBranch), string(name: &apos;GitAuthor&apos;, value: str)]
+                }
+            }
+            post{
+                success{
+                    echo &quot;Build Success&quot;
+                }
+                failure{
+                    build job:&apos;Send_Email&apos;,parameters: [[$class: &apos;StringParameterValue&apos;, name : &apos;message&apos; , value: &quot;Digital Build failed&quot; ]]
+                    
+                }
+            }
+        }
+        stage(&apos;Creating a Package of war files&apos;) {
+        steps{
+            script{
+            sh &apos;cd /data01/jenkins/jobs/Digital_Build/workspace/nectarwebsite &amp;&amp; mvn -Pdist install&apos;
+                 }
+            }
+        }
+        stage(&apos;SonarGate&apos;) {
+        steps{
+            build job: &apos;SonarTests&apos;, parameters: [string(name: &apos;branch&apos;, value: env.ghprbSourceBranch), string(name: &apos;module&apos;, value: &apos;digital-website&apos;), string(name: &apos;UpStreamJob&apos;, value: env.JOB_NAME)], propagate: false
+            echo &apos;SonarGate = Success&apos;
+            }
+        }
+        }
+    }</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

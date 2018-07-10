@@ -1,0 +1,107 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.cloudbees.plugins.deployer.DeployNowJobProperty plugin="deployer-framework@1.1">
+      <oneClickDeploy>false</oneClickDeploy>
+      <hosts/>
+    </com.cloudbees.plugins.deployer.DeployNowJobProperty>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty plugin="naginator@1.17.2">
+      <optOut>false</optOut>
+    </com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty>
+    <org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration plugin="periodic-reincarnation@1.12.1">
+      <isLocallyConfigured>false</isLocallyConfigured>
+      <isLocallyDeactivated>false</isLocallyDeactivated>
+    </org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>module</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>cp -rf /data01/jenkins/jobs/${module}/workspace/* .
+docker-compose -f docker-compose-ci.yml -p vagrant stop
+sleep 25
+docker-compose -f docker-compose-ci.yml -p vagrant rm --force
+echo &apos;Before molehill up..&apos;
+docker-compose -f docker-compose-ci.yml -p vagrant up -d molehill-db
+sleep 25
+echo &apos;molehill up wait 90 seconds completed.. Start deploy Schema&apos;
+./banking-database/docker/deploy-molehill-schema-docker.sh -p vagrant
+echo &apos;molehill schema deployment completed.. test data run to be started ..&apos;
+./banking-database/docker/deploy-test-data.sh -p vagrant
+echo &apos;completed docker db data execution ..&apos;
+
+
+echo &apos; Soap module selection ...&apos;
+echo  ${module}
+if [ ${module} == &quot;auth-build&quot; ]
+then
+	echo &apos;bringing up auth service&apos;
+	docker-compose -f docker-compose-ci.yml  -p vagrant up -d collectorauth
+elif [ ${module} == &quot;reference-build&quot; ] 
+then
+	echo &apos;bringing up reference service&apos;
+	docker-compose -f docker-compose-ci.yml  -p vagrant up -d reference
+elif [ ${module} == &quot;personal-build&quot; ] 
+then
+	echo &apos;bringing up personal service&apos;
+	docker-compose -f docker-compose-ci.yml  -p vagrant up -d personal
+elif [ ${module} == &quot;enrolment-build&quot; ]
+then
+	# Bring up mock email server
+	docker-compose -f docker-compose-ci.yml -p vagrant up -d mock-email
+    sleep 10
+	docker-compose -f docker-compose-ci.yml  -p vagrant up -d enrolment
+	sleep 25	
+	echo &apos;start running enrolment soap test ..&apos;
+	# Enrolement Resources
+	/data01/soap/SoapUI-5.4.0/bin/testrunner.sh `pwd`/nectar-openapi-enrolment-soapui-test/New-card-request-resource/NewCardRequest-soapui-project.xml -P Env=Docker
+	#/data01/soap/SoapUI-5.4.0/bin/testrunner.sh `pwd`/nectar-openapi-enrolment-soapui-test/Password-update-2fa-resource/Password-update-2FA-soapui-project.xml -P Env=Docker
+	#/data01/soap/SoapUI-5.4.0/bin/testrunner.sh `pwd`/nectar-openapi-enrolment-soapui-test/Enrolments-resource/NewRegistration-soapui-project.xml -P Env=Docker
+	# Enrolement Resources End
+echo &apos;start running enrolment soap completed ..&apos;
+	#docker-compose stop enrolment
+elif [ ${module} == &quot;transaction-build&quot; ]
+then
+	echo &apos;bringing up transaction service&apos;
+	docker-compose -f docker-compose-ci.yml  -p vagrant up -d transaction
+fi
+#docker-compose stop molehill_db
+echo &quot;bringing docker services down ..&quot;
+docker-compose -f docker-compose-ci.yml -p vagrant stop
+docker-compose -f docker-compose-ci.yml -p vagrant rm --force
+echo &quot;SOAP Test pipeline exiting ..&quot;</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

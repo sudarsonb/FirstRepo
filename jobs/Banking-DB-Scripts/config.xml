@@ -1,0 +1,113 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.cloudbees.plugins.deployer.DeployNowJobProperty plugin="deployer-framework@1.1">
+      <oneClickDeploy>false</oneClickDeploy>
+      <hosts/>
+    </com.cloudbees.plugins.deployer.DeployNowJobProperty>
+    <com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty plugin="naginator@1.17.2">
+      <optOut>false</optOut>
+    </com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty>
+    <org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration plugin="periodic-reincarnation@1.12.1">
+      <isLocallyConfigured>false</isLocallyConfigured>
+      <isLocallyDeactivated>false</isLocallyDeactivated>
+    </org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>branch</name>
+          <description></description>
+          <defaultValue>sudarsonb-patch-1</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>folder_path</name>
+          <description>Enter the folder path in the branch from which the scripts has to run.</description>
+          <defaultValue>Testfiles</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>Environment</name>
+          <description>Select the environment in which the scripts has to run</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>T4</string>
+              <string>T2</string>
+              <string>T6</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.PasswordParameterDefinition>
+          <name>password</name>
+          <description></description>
+          <defaultValue>{AQAAABAAAAAQGDV6Ac5l+JA83F36xYceVAAEWarz+JCZBuDA7Kz1zjw=}</defaultValue>
+        </hudson.model.PasswordParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.1">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://github.com/nectar-uk/banking-database.git</url>
+        <credentialsId>JenkinsGitKey</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/$branch</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>
+LD_LIBRARY_PATH=/data01/oracledb/instantclient_12_2:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH
+PATH=/data01/oracledb/instantclient_12_2:${PATH}
+export PATH
+echo $PATH
+SQLPATH=/data01/oracledb/instantclient_12_2
+export SQLPATH
+cd $folder_path
+
+if [ $Environment == &apos;T4&apos; ]
+then
+	for i in `ls`
+	do
+	echo &quot;@$i;&quot; | sqlplus &quot;TEST_AUTOMATION/$password@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.23.79)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=AMITLTT4)))&quot;
+	done
+elif [ $Environment == &apos;T2&apos; ]
+then
+	for i in `ls`
+	do
+	echo &quot;@$i;&quot; | sqlplus &quot;OPENAPI/atic\$t4*s@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.23.79)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=AMITLTT2)))&quot;
+	done
+elif [ $Environment == &apos;T6&apos; ]
+then
+	for i in `ls`
+	do
+	echo &quot;@$i;&quot; | sqlplus &quot;TEST_AUTOMATION/Hrt2a\$Sn@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.23.79)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=AMITLTT6)))&quot;
+	done
+fi</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

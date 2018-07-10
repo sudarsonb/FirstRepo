@@ -1,0 +1,112 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>find the report on Master in the below path:&#xd;
+/data01/jenkins/jobs/jmeter-job/builds/&lt;build-no&gt;/archive/perticular-module-build/workspace/jmeter/scripts</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.cloudbees.plugins.deployer.DeployNowJobProperty plugin="deployer-framework@1.1">
+      <oneClickDeploy>false</oneClickDeploy>
+      <hosts/>
+    </com.cloudbees.plugins.deployer.DeployNowJobProperty>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>20</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty plugin="naginator@1.17.2">
+      <optOut>false</optOut>
+    </com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty>
+    <org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration plugin="periodic-reincarnation@1.12.1">
+      <isLocallyConfigured>false</isLocallyConfigured>
+      <isLocallyDeactivated>false</isLocallyDeactivated>
+    </org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.TextParameterDefinition>
+          <name>module</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <assignedNode>performance-jmeter</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/sh
+cd $(pwd)/${module}/workspace
+echo ${module}
+docker-compose -f docker-compose-ci.yml -p vagrant stop
+docker-compose -f docker-compose-ci.yml -p vagrant rm --force
+chmod 755 provision.sh
+echo &apos;start db&apos;
+if [ ${module} == &quot;banking-auth-service-PR&quot; ] || [ ${module} == &quot;banking-auth-service-dev&quot; ] || [ ${module} == &quot;auth-build&quot; ]
+then
+    echo &apos;bringing up auth service&apos;
+    docker-compose -f docker-compose-ci.yml -p vagrant up -d molehill-db collectorauth
+elif [ ${module} == &quot;banking-reference-service-PR&quot; ] || [ ${module} == &quot;banking-reference-service-dev&quot; ] 
+then
+    echo &apos;bringing up reference service&apos;
+    docker-compose -f docker-compose-ci.yml -p vagrant up -d molehill-db reference
+elif [ ${module} == &quot;banking-enrolment-service-PR&quot; ] || [ ${module} == &quot;banking-enrolment-service-dev&quot; ] || [ ${module} == &quot;enrolment-build&quot; ]
+then
+    echo &apos;bringing up enrolment service&apos;
+    docker-compose -f docker-compose-ci.yml -p vagrant up -d molehill-db enrolment
+elif [ ${module} == &quot;transaction-build&quot; ] || [ ${module} == &quot;banking-transaction-service-dev&quot; ]
+then
+    echo &apos;bringing up transaction service&apos;
+    docker-compose -f docker-compose-ci.yml -p vagrant up -d molehill-db transaction
+fi
+sleep 90
+echo &apos;deploy schema&apos;
+./banking-database/docker/deploy-molehill-schema-docker.sh -p vagrant
+echo &apos;pre test data&apos;
+./banking-database/docker/deploy-test-data.sh -p vagrant
+echo &apos;run tests&apos;
+docker-compose -f docker-compose-ci.yml -p vagrant up jmetertest
+echo &apos;jmeter test completed ..&apos;
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>${module}/workspace/jmeter/scripts/performance_report.xml</artifacts>
+      <allowEmptyArchive>true</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+      <caseSensitive>true</caseSensitive>
+    </hudson.tasks.ArtifactArchiver>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.34">
+      <deleteDirs>false</deleteDirs>
+      <cleanupParameter></cleanupParameter>
+      <externalDelete></externalDelete>
+    </hudson.plugins.ws__cleanup.PreBuildCleanup>
+    <com.michelin.cio.hudson.plugins.copytoslave.CopyToSlaveBuildWrapper plugin="copy-to-slave@1.4.4">
+      <includes>${module}/workspace/</includes>
+      <excludes></excludes>
+      <flatten>false</flatten>
+      <includeAntExcludes>false</includeAntExcludes>
+      <hudsonHomeRelative>false</hudsonHomeRelative>
+      <relativeTo>somewhereElse</relativeTo>
+    </com.michelin.cio.hudson.plugins.copytoslave.CopyToSlaveBuildWrapper>
+  </buildWrappers>
+</project>

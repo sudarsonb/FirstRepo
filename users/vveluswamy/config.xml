@@ -1,0 +1,123 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<user>
+  <fullName>Vignesh Veluswamy</fullName>
+  <properties>
+    <jenkins.security.ApiTokenProperty>
+      <apiToken>{AQAAABAAAAAwtfMsv6/ZKH6jfvLamFFg8CFuYqOKQOdlPV/MSyfl9wmmxMDp3kgfkC5Qt0/gb2bwnPfhZN35VG4bVok1VNQoMQ==}</apiToken>
+    </jenkins.security.ApiTokenProperty>
+    <com.cloudbees.plugins.credentials.UserCredentialsProvider_-UserCredentialsProperty plugin="credentials@2.1.16">
+      <domainCredentialsMap class="hudson.util.CopyOnWriteMap$Hash"/>
+    </com.cloudbees.plugins.credentials.UserCredentialsProvider_-UserCredentialsProperty>
+    <hudson.plugins.emailext.watching.EmailExtWatchAction_-UserProperty plugin="email-ext@2.62">
+      <triggers/>
+    </hudson.plugins.emailext.watching.EmailExtWatchAction_-UserProperty>
+    <hudson.model.MyViewsProperty>
+      <views>
+        <hudson.model.AllView>
+          <owner class="hudson.model.MyViewsProperty" reference="../../.."/>
+          <name>all</name>
+          <filterExecutors>false</filterExecutors>
+          <filterQueue>false</filterQueue>
+          <properties class="hudson.model.View$PropertyList"/>
+        </hudson.model.AllView>
+      </views>
+    </hudson.model.MyViewsProperty>
+    <org.jenkinsci.plugins.displayurlapi.user.PreferredProviderUserProperty plugin="display-url-api@2.2.0">
+      <providerId>default</providerId>
+    </org.jenkinsci.plugins.displayurlapi.user.PreferredProviderUserProperty>
+    <hudson.model.PaneStatusProperties>
+      <collapsed/>
+    </hudson.model.PaneStatusProperties>
+    <hudson.search.UserSearchProperty>
+      <insensitiveSearch>true</insensitiveSearch>
+    </hudson.search.UserSearchProperty>
+    <hudson.security.HudsonPrivateSecurityRealm_-Details>
+      <passwordHash>#jbcrypt:$2a$10$e5OK4Q4BP18oReIDsyPZ0e1bKgV7sS4zFiZVXSNRPmOJGY74b45xO</passwordHash>
+    </hudson.security.HudsonPrivateSecurityRealm_-Details>
+    <hudson.tasks.Mailer_-UserProperty plugin="mailer@1.21">
+      <emailAddress>vignesh.veluswamy@aimia.com</emailAddress>
+    </hudson.tasks.Mailer_-UserProperty>
+    <jenkins.security.LastGrantedAuthoritiesProperty>
+      <roles>
+        <string>authenticated</string>
+      </roles>
+      <timestamp>1513336029063</timestamp>
+    </jenkins.security.LastGrantedAuthoritiesProperty>
+    <hudson.plugins.favorite.user.FavoriteUserProperty plugin="favorite@2.3.2">
+      <data class="concurrent-hash-map">
+        <entry>
+          <string>banking-reference-service-dev</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>Reference-PR-pipeline</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>banking-common-service-PR</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>banking-businessrules-service-dev</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>banking-batch-dev</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>Transaction-PR-pipeline</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>personal-build</string>
+          <boolean>false</boolean>
+        </entry>
+        <entry>
+          <string>banking-enrolment-service-dev</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>banking-common-service-dev</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>banking-rules-definitions-PR</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>Personal-PR-Pipeline</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>transaction-build</string>
+          <boolean>false</boolean>
+        </entry>
+        <entry>
+          <string>banking-businessrules-service-PR</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>Enrolment-PR-Pipeline</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>banking-transaction-service-dev</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>banking-batch-PR</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>banking-personal-service-dev</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>Auth-PR-Pipeline</string>
+          <boolean>true</boolean>
+        </entry>
+      </data>
+    </hudson.plugins.favorite.user.FavoriteUserProperty>
+  </properties>
+</user>

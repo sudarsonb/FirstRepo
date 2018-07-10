@@ -1,0 +1,48 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.21">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration plugin="periodic-reincarnation@1.12.1">
+      <isLocallyConfigured>false</isLocallyConfigured>
+      <isLocallyDeactivated>false</isLocallyDeactivated>
+    </org.jenkinsci.plugins.periodicreincarnation.JobLocalConfiguration>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>Test</name>
+          <description></description>
+          <defaultValue>test</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+    <script>//build job: &apos;Artifact Deployment&apos;, parameters: [string(name: &apos;env&apos;, value: &apos;T4&apos;), string(name: &apos;rest_snap_modules&apos;, value: &apos;enrolment&apos;), ]
+//build job: &apos;SonarTests&apos;, parameters: [string(name: &apos;branch&apos;, value: &quot;dev&quot;)], propagate:false
+
+echo &quot;hi...&quot; 
+echo params.Test
+echo env.JOB_NAME
+node{
+    stage(&apos;Display&apos;)
+    {
+        cleanWs()
+        git branch: &apos;sudarsonb-patch-1&apos;, changelog: false, credentialsId: &apos;Digital-GIT&apos;, poll: false, url: &apos;https://github.com/nectar-uk/nectar-website.git&apos;
+        sh &apos;pwd&apos;
+        sh &apos;cd nectarwebsite &amp;&amp; mvn --batch-mode release:prepare -Duser=sudarsonb -Dpassword=c7aa2f687c298dc90226d483c23e8ea941984686 -s /lgames/website_settings.xml&apos;
+  
+    }
+}
+</script>
+    <sandbox>false</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
